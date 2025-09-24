@@ -27,11 +27,12 @@ jobs:
       - name: Set bucket name
         run: |
           ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-          REGION=$(aws configure get region)
+          REGION=$AWS_REGION
           BUCKET="cf-templates-$ACCOUNT_ID-$REGION"
           echo "BUCKET=$BUCKET" >> $GITHUB_ENV
           echo "REGION=$REGION" >> $GITHUB_ENV
           echo "Using bucket: $BUCKET in region $REGION"
+
 
       # Ensure S3 bucket exists (create if missing)
       - name: Create S3 bucket for templates
