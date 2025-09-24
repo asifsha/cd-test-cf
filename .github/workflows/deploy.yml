@@ -21,7 +21,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::<ACCOUNT_ID>:role/<GITHUB_DEPLOY_ROLE>
+          role-to-assume: arn:aws:iam::412381746256:role/githubAccessECRECSRole
           aws-region: ap-southeast-2
 
       # Ensure S3 bucket exists (create if missing)
