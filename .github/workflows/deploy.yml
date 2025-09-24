@@ -55,6 +55,16 @@ jobs:
           aws s3 cp security-groups.yaml s3://$BUCKET/
           aws s3 cp main.yaml s3://$BUCKET/
 
+      - name: Debug secrets (mask safe)
+        run: |
+          if [ -z "${{ secrets.DB_PASSWORD }}" ]; then
+            echo "❌ DB_PASSWORD secret is missing"
+            exit 1
+          else
+            echo "✅ DB_PASSWORD secret is set"
+          fi
+
+
       # Deploy/Update stack
       - name: Deploy CloudFormation stack
         run: |
