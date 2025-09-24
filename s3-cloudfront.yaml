@@ -19,8 +19,6 @@ Resources:
   StaticAssetsBucket:
     Type: AWS::S3::Bucket
     Properties:
-      # Make the bucket globally unique by including AccountId
-      BucketName: !Sub "${AWS::StackName}-static-assets-${AWS::AccountId}"
       VersioningConfiguration:
         Status: Enabled
       PublicAccessBlockConfiguration:
@@ -88,14 +86,14 @@ Outputs:
   StaticAssetsBucketName:
     Value: !Ref StaticAssetsBucket
     Export:
-      Name: StaticAssetsBucketName
+      Name: !Sub "${AWS::StackName}-StaticAssetsBucketName"
 
   CloudFrontDistributionId:
     Value: !Ref CloudFrontDistribution
     Export:
-      Name: CloudFrontDistributionId
+      Name: !Sub "${AWS::StackName}-CloudFrontDistributionId"
 
   CloudFrontDomainName:
     Value: !GetAtt CloudFrontDistribution.DomainName
     Export:
-      Name: CloudFrontDomainName
+      Name: !Sub "${AWS::StackName}-CloudFrontDomainName"
