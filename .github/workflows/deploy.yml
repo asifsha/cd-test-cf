@@ -86,12 +86,11 @@ jobs:
 
           echo "Deploying stack..."
           aws cloudformation deploy \
-            --stack-name $STACK_NAME \
-            --template-file main.yaml \
-            --capabilities CAPABILITY_NAMED_IAM \
-            --no-fail-on-empty-changeset \
-            --parameter-overrides \
-              DBUsername=masteruser \
-              DBPassword=$DB_PASSWORD \
-              InstanceType=t3.micro
-
+          --stack-name MyAppStack \
+          --template-file main.yaml \
+          --capabilities CAPABILITY_NAMED_IAM \
+          --parameter-overrides \
+            BucketName=$BUCKET \
+            DBUsername=masteruser \
+            DBPassword=$DB_PASSWORD \
+            InstanceType=t3.micro
