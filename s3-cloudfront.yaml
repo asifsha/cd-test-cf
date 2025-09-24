@@ -11,12 +11,16 @@ Parameters:
     Description: ACM certificate ARN for HTTPS (must be in us-east-1 for CloudFront)
     Default: ""
 
+Conditions:
+  HasCert: !Not [!Equals [!Ref CertificateArn, ""]]
+
 Resources:
   ## S3 Bucket for static assets
   StaticAssetsBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub "${AWS::StackName}-static-assets"
+      # Make the bucket globally unique by including AccountId
+      BucketName: !Sub "${AWS::StackName}-static-assets-${AWS::AccountId}"
       VersioningConfiguration:
         Status: Enabled
       PublicAccessBlockConfiguration:
@@ -79,9 +83,6 @@ Resources:
           - HasCert
           - [!Ref DomainName]
           - !Ref "AWS::NoValue"
-
-Conditions:
-  HasCert: !Not [!Equals [!Ref CertificateArn, ""]]
 
 Outputs:
   StaticAssetsBucketName:

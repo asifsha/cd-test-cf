@@ -119,5 +119,9 @@ Outputs:
     Value: !GetAtt AppASGStack.Outputs.ASGName
   DBEndpoint:
     Value: !GetAtt RDSStack.Outputs.DBEndpoint
-  CloudFrontDomain:
+  StaticAssetsBucketName:
+    Value: !GetAtt S3CloudFrontStack.Outputs.StaticAssetsBucketName
+  CloudFrontDistributionId:
+    Value: !GetAtt S3CloudFrontStack.Outputs.CloudFrontDistributionId
+  CloudFrontDomainName:
     Value: !GetAtt S3CloudFrontStack.Outputs.CloudFrontDomainName
