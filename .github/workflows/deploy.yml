@@ -1,0 +1,61 @@
+name: Deploy CloudFormation
+
+on:
+  push:
+    branches:
+      - main  # trigger on main branch pushes
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # Configure AWS credentials (OIDC or store secrets)
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::<ACCOUNT_ID>:role/<GITHUB_DEPLOY_ROLE>
+          aws-region: ap-southeast-2
+
+      # Ensure S3 bucket exists (create if missing)
+      - name: Create S3 bucket for templates
+        run: |
+          BUCKET=my-cloudformation-templates-bucket
+          REGION=ap-southeast-2
+          if ! aws s3 ls "s3://$BUCKET" 2>&1 | grep -q 'NoSuchBucket'; then
+            echo "Bucket $BUCKET already exists"
+          else
+            echo "Creating bucket $BUCKET"
+            aws s3 mb s3://$BUCKET --region $REGION
+          fi
+
+      # Upload templates to S3
+      - name: Upload CloudFormation templates
+        run: |
+          BUCKET=my-cloudformation-templates-bucket
+          aws s3 cp vpc.yaml s3://$BUCKET/
+          aws s3 cp rds.yaml s3://$BUCKET/
+          aws s3 cp app-asg.yaml s3://$BUCKET/
+          aws s3 cp alb-nlb.yaml s3://$BUCKET/
+          aws s3 cp s3-cloudfront.yaml s3://$BUCKET/
+          aws s3 cp security-groups.yaml s3://$BUCKET/
+          aws s3 cp main.yaml s3://$BUCKET/
+
+      # Deploy/Update stack
+      - name: Deploy CloudFormation stack
+        run: |
+          aws cloudformation deploy \
+            --stack-name MyAppStack \
+            --template-file main.yaml \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --parameter-overrides \
+              DBUsername=masteruser \
+              DBPassword=${{ secrets.DB_PASSWORD }} \
+              InstanceType=t3.micro

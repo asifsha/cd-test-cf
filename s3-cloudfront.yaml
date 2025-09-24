@@ -1,0 +1,100 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: S3 Bucket with CloudFront CDN for static assets
+
+Parameters:
+  DomainName:
+    Type: String
+    Description: The custom domain for CloudFront (optional)
+
+  CertificateArn:
+    Type: String
+    Description: ACM certificate ARN for HTTPS (must be in us-east-1 for CloudFront)
+    Default: ""
+
+Resources:
+  ## S3 Bucket for static assets
+  StaticAssetsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${AWS::StackName}-static-assets"
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: Name
+          Value: StaticAssetsBucket
+
+  ## OAI (Origin Access Identity) for CloudFront to access S3
+  CloudFrontOAI:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: !Sub "Access Identity for ${AWS::StackName} CloudFront"
+
+  ## Bucket Policy (allow only CloudFront OAI)
+  StaticAssetsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref StaticAssetsBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${CloudFrontOAI}"
+            Action: s3:GetObject
+            Resource: !Sub "${StaticAssetsBucket.Arn}/*"
+
+  ## CloudFront Distribution
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        DefaultCacheBehavior:
+          AllowedMethods: [GET, HEAD]
+          CachedMethods: [GET, HEAD]
+          TargetOriginId: S3Origin
+          ForwardedValues:
+            QueryString: false
+          ViewerProtocolPolicy: redirect-to-https
+        Origins:
+          - Id: S3Origin
+            DomainName: !GetAtt StaticAssetsBucket.RegionalDomainName
+            S3OriginConfig:
+              OriginAccessIdentity: !Sub "origin-access-identity/cloudfront/${CloudFrontOAI}"
+        DefaultRootObject: index.html
+        PriceClass: PriceClass_100
+        ViewerCertificate:
+          AcmCertificateArn: !If
+            - HasCert
+            - !Ref CertificateArn
+            - !Ref "AWS::NoValue"
+          SslSupportMethod: sni-only
+        Aliases: !If
+          - HasCert
+          - [!Ref DomainName]
+          - !Ref "AWS::NoValue"
+
+Conditions:
+  HasCert: !Not [!Equals [!Ref CertificateArn, ""]]
+
+Outputs:
+  StaticAssetsBucketName:
+    Value: !Ref StaticAssetsBucket
+    Export:
+      Name: StaticAssetsBucketName
+
+  CloudFrontDistributionId:
+    Value: !Ref CloudFrontDistribution
+    Export:
+      Name: CloudFrontDistributionId
+
+  CloudFrontDomainName:
+    Value: !GetAtt CloudFrontDistribution.DomainName
+    Export:
+      Name: CloudFrontDomainName
