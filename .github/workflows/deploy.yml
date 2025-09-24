@@ -35,11 +35,9 @@ jobs:
 
 
       # Ensure S3 bucket exists (create if missing)
-      - name: Create S3 bucket for templates
+      - name: Ensure S3 bucket exists
         run: |
-          BUCKET=my-cloudformation-templates-bucket
-          REGION=ap-southeast-2
-          if ! aws s3 ls "s3://$BUCKET" 2>&1 | grep -q 'NoSuchBucket'; then
+          if aws s3api head-bucket --bucket "$BUCKET" 2>/dev/null; then
             echo "Bucket $BUCKET already exists"
           else
             echo "Creating bucket $BUCKET"
