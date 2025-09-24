@@ -41,23 +41,6 @@ Resources:
         SigningBehavior: always
         OriginAccessControlOriginType: s3
 
-  ## Bucket Policy (allow only CloudFront via OAC)
-  StaticAssetsBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref StaticAssetsBucket
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: cloudfront.amazonaws.com
-            Action: s3:GetObject
-            Resource: !Sub "${StaticAssetsBucket.Arn}/*"
-            Condition:
-              StringEquals:
-                AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}"
-
   ## CloudFront Distribution
   CloudFrontDistribution:
     Type: AWS::CloudFront::Distribution
@@ -68,8 +51,7 @@ Resources:
           AllowedMethods: [GET, HEAD]
           CachedMethods: [GET, HEAD]
           TargetOriginId: S3Origin
-          ForwardedValues:
-            QueryString: false
+          CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad # AWS Managed-CachingOptimized
           ViewerProtocolPolicy: redirect-to-https
         Origins:
           - Id: S3Origin
@@ -88,6 +70,24 @@ Resources:
           - HasCert
           - [!Ref DomainName]
           - !Ref "AWS::NoValue"
+
+  ## Bucket Policy (allow only CloudFront via OAC)
+  StaticAssetsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref StaticAssetsBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub "${StaticAssetsBucket.Arn}/*"
+            Condition:
+              StringEquals:
+                aws:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}"
+    DependsOn: CloudFrontDistribution
 
 Outputs:
   StaticAssetsBucketName:
