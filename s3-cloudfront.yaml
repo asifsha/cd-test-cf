@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: S3 Bucket with CloudFront CDN for static assets
+Description: S3 Bucket with CloudFront CDN for static assets (using OAC)
 
 Parameters:
   DomainName:
@@ -30,14 +30,18 @@ Resources:
         - Key: Name
           Value: StaticAssetsBucket
 
-  ## OAI (Origin Access Identity) for CloudFront to access S3
-  CloudFrontOAI:
-    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+  ## OAC (Origin Access Control) for CloudFront to access S3
+  CloudFrontOAC:
+    Type: AWS::CloudFront::OriginAccessControl
     Properties:
-      CloudFrontOriginAccessIdentityConfig:
-        Comment: !Sub "Access Identity for ${AWS::StackName} CloudFront"
+      OriginAccessControlConfig:
+        Name: !Sub "${AWS::StackName}-OAC"
+        Description: !Sub "OAC for ${AWS::StackName} CloudFront"
+        SigningProtocol: sigv4
+        SigningBehavior: always
+        OriginAccessControlOriginType: s3
 
-  ## Bucket Policy (allow only CloudFront OAI)
+  ## Bucket Policy (allow only CloudFront via OAC)
   StaticAssetsBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
@@ -47,9 +51,12 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              CanonicalUser: !GetAtt CloudFrontOAI.S3CanonicalUserId
+              Service: cloudfront.amazonaws.com
             Action: s3:GetObject
             Resource: !Sub "${StaticAssetsBucket.Arn}/*"
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}"
 
   ## CloudFront Distribution
   CloudFrontDistribution:
@@ -67,8 +74,8 @@ Resources:
         Origins:
           - Id: S3Origin
             DomainName: !GetAtt StaticAssetsBucket.RegionalDomainName
-            S3OriginConfig:
-              OriginAccessIdentity: !Join ["", ["origin-access-identity/cloudfront/", !Ref CloudFrontOAI]]
+            S3OriginConfig: {} # OAC replaces OAI here
+            OriginAccessControlId: !Ref CloudFrontOAC
         DefaultRootObject: index.html
         PriceClass: PriceClass_100
         ViewerCertificate:
