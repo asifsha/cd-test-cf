@@ -47,7 +47,6 @@ jobs:
       # Upload templates to S3
       - name: Upload CloudFormation templates
         run: |
-          BUCKET=my-cloudformation-templates-bucket
           aws s3 cp vpc.yaml s3://$BUCKET/
           aws s3 cp rds.yaml s3://$BUCKET/
           aws s3 cp app-asg.yaml s3://$BUCKET/
