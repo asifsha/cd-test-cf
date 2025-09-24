@@ -2,24 +2,24 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: VPC with public/private subnets, NAT gateways, and SSM endpoint
 
 Parameters:
-  VpcCIDR:
+  VpcCidr:
     Type: String
     Default: 192.168.0.0/16
-    Description: CIDR block for the VPC
+    Description: Cidr block for the VPC
 
-  PublicSubnet1CIDR:
+  PublicSubnet1Cidr:
     Type: String
     Default: 192.168.1.0/24
 
-  PublicSubnet2CIDR:
+  PublicSubnet2Cidr:
     Type: String
     Default: 192.168.2.0/24
 
-  PrivateSubnet1CIDR:
+  PrivateSubnet1Cidr:
     Type: String
     Default: 192.168.10.0/24
 
-  PrivateSubnet2CIDR:
+  PrivateSubnet2Cidr:
     Type: String
     Default: 192.168.20.0/24
 
@@ -28,7 +28,7 @@ Resources:
   VPC:
     Type: AWS::EC2::VPC
     Properties:
-      CidrBlock: !Ref VpcCIDR
+      CidrBlock: !Ref VpcCidr
       EnableDnsSupport: true
       EnableDnsHostnames: true
       Tags:
@@ -54,7 +54,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      CidrBlock: !Ref PublicSubnet1CIDR
+      CidrBlock: !Ref PublicSubnet1Cidr
       AvailabilityZone: !Select [ 0, !GetAZs '' ]
       MapPublicIpOnLaunch: true
       Tags:
@@ -65,7 +65,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      CidrBlock: !Ref PublicSubnet2CIDR
+      CidrBlock: !Ref PublicSubnet2Cidr
       AvailabilityZone: !Select [ 1, !GetAZs '' ]
       MapPublicIpOnLaunch: true
       Tags:
@@ -77,7 +77,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      CidrBlock: !Ref PrivateSubnet1CIDR
+      CidrBlock: !Ref PrivateSubnet1Cidr
       AvailabilityZone: !Select [ 0, !GetAZs '' ]
       MapPublicIpOnLaunch: false
       Tags:
@@ -88,7 +88,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      CidrBlock: !Ref PrivateSubnet2CIDR
+      CidrBlock: !Ref PrivateSubnet2Cidr
       AvailabilityZone: !Select [ 1, !GetAZs '' ]
       MapPublicIpOnLaunch: false
       Tags:
