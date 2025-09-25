@@ -5,6 +5,7 @@ Parameters:
   DomainName:
     Type: String
     Description: The custom domain for CloudFront (optional)
+    Default: ""
 
   CertificateArn:
     Type: String
@@ -61,11 +62,13 @@ Resources:
         DefaultRootObject: index.html
         PriceClass: PriceClass_100
         ViewerCertificate:
-          AcmCertificateArn: !If
+          !If
             - HasCert
-            - !Ref CertificateArn
+            - 
+              AcmCertificateArn: !Ref CertificateArn
+              SslSupportMethod: sni-only
+              MinimumProtocolVersion: TLSv1.2_2021
             - !Ref "AWS::NoValue"
-          SslSupportMethod: sni-only
         Aliases: !If
           - HasCert
           - [!Ref DomainName]
