@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: RDS MariaDB (Primary + Read Replica)
+Description: RDS MariaDB (Primary + optional Read Replica)
 
 Parameters:
   VPCId:
@@ -37,7 +37,9 @@ Resources:
         - Key: Name
           Value: RDS-SubnetGroup
 
-  ## Parameter Group (optional)
+  ## Parameter Group
+  ## ⚠️ Double-check that "mariadb10.6" is valid in your region:
+  ## aws rds describe-db-engine-versions --engine mariadb --query "DBEngineVersions[].DBParameterGroupFamily"
   RDSParameterGroup:
     Type: AWS::RDS::DBParameterGroup
     Properties:
@@ -50,7 +52,7 @@ Resources:
   RDSPrimary:
     Type: AWS::RDS::DBInstance
     Properties:
-      DBInstanceIdentifier: myapp-mariadb-primary
+      DBInstanceIdentifier: !Sub "${AWS::StackName}-mariadb-primary"
       DBName: MyAppDB
       Engine: mariadb
       EngineVersion: 10.6
@@ -71,20 +73,20 @@ Resources:
         - Key: Name
           Value: RDS-Primary
 
-  ## Read Replica
-  RDSReplica:
-    Type: AWS::RDS::DBInstance
-    Properties:
-      DBInstanceIdentifier: myapp-mariadb-replica
-      SourceDBInstanceIdentifier: !Ref RDSPrimary
-      DBInstanceClass: db.t3.micro
-      PubliclyAccessible: false
-      VPCSecurityGroups:
-        - !Ref RDSSGId
-      DBSubnetGroupName: !Ref RDSSubnetGroup
-      Tags:
-        - Key: Name
-          Value: RDS-Replica
+  ## Read Replica (optional — uncomment after primary is stable)
+  # RDSReplica:
+  #   Type: AWS::RDS::DBInstance
+  #   Properties:
+  #     DBInstanceIdentifier: !Sub "${AWS::StackName}-mariadb-replica"
+  #     SourceDBInstanceIdentifier: !Ref RDSPrimary
+  #     DBInstanceClass: db.t3.micro
+  #     PubliclyAccessible: false
+  #     VPCSecurityGroups:
+  #       - !Ref RDSSGId
+  #     DBSubnetGroupName: !Ref RDSSubnetGroup
+  #     Tags:
+  #       - Key: Name
+  #         Value: RDS-Replica
 
 Outputs:
   RDSPrimaryEndpoint:
@@ -92,7 +94,6 @@ Outputs:
     Export:
       Name: RDSPrimaryEndpoint
 
-  RDSReplicaEndpoint:
-    Value: !GetAtt RDSReplica.Endpoint.Address
-    Export:
-      Name: RDSReplicaEndpoint
+  # Uncomment if you enable the replica
+  # RDSReplicaEndpoint:
+  #   Value: !Get
