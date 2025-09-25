@@ -87,7 +87,7 @@ Resources:
         PrivateSubnet2Id: !GetAtt VPCStack.Outputs.PrivateSubnet2Id
         AppSGId: !GetAtt SecurityGroupsStack.Outputs.AppSGId
         InstanceType: !Ref InstanceType
-        DBEndpoint: !GetAtt RDSStack.Outputs.DBEndpoint
+        RDSPrimaryEndpoint: !GetAtt RDSStack.Outputs.RDSPrimaryEndpoint
 
   ## Load Balancer
   LoadBalancerStack:
@@ -117,8 +117,8 @@ Outputs:
     Value: !GetAtt LoadBalancerStack.Outputs.NLBEndpoint
   AppASGName:
     Value: !GetAtt AppASGStack.Outputs.ASGName
-  DBEndpoint:
-    Value: !GetAtt RDSStack.Outputs.DBEndpoint
+  RDSPrimaryEndpoint:
+    Value: !GetAtt RDSStack.Outputs.RDSPrimaryEndpoint
   StaticAssetsBucketName:
     Value: !GetAtt S3CloudFrontStack.Outputs.StaticAssetsBucketName
   CloudFrontDistributionId:
