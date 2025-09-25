@@ -72,7 +72,7 @@ Resources:
         VPCId: !GetAtt VPCStack.Outputs.VPCId
         PrivateSubnet1Id: !GetAtt VPCStack.Outputs.PrivateSubnet1Id
         PrivateSubnet2Id: !GetAtt VPCStack.Outputs.PrivateSubnet2Id
-        DBSGId: !GetAtt SecurityGroupsStack.Outputs.DBSGId
+        RDSSGId: !GetAtt SecurityGroupsStack.Outputs.RDSSGId
         DBUsername: !Ref DBUsername
         DBPassword: !Ref DBPassword
 
