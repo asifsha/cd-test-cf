@@ -84,10 +84,10 @@ Outputs:
     Export:
       Name: SSMHostSGId
 
-  AppServerSGId:
+  AppSGId:
     Value: !Ref AppServerSG
     Export:
-      Name: AppServerSGId
+      Name: AppSGId
 
   RDSSGId:
     Value: !Ref RDSSG
