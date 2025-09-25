@@ -17,7 +17,7 @@ Parameters:
 
   SSMHostSGId:
     Type: String
-  AppServerSGId:
+  AppSGId:
     Type: String
 
 Resources:
@@ -70,7 +70,7 @@ Resources:
         IamInstanceProfile:
           Arn: !GetAtt EC2InstanceProfile.Arn
         SecurityGroupIds:
-          - !Ref AppServerSGId
+          - !Ref AppSGId
         UserData:
           Fn::Base64: |
             #!/bin/bash
