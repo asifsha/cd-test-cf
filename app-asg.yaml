@@ -20,6 +20,15 @@ Parameters:
   AppSGId:
     Type: String
 
+  InstanceType:        # <--- new
+    Type: String
+    Default: t3.micro
+    Description: EC2 Instance type for App Server
+
+  RDSPrimaryEndpoint:  # <--- new
+    Type: String
+    Description: Primary RDS endpoint for application
+
 Resources:
   ## IAM Role for EC2 SSM
   EC2SSMRole:
@@ -50,7 +59,7 @@ Resources:
   SSMHostInstance:
     Type: AWS::EC2::Instance
     Properties:
-      InstanceType: t3.micro
+      InstanceType: !Ref InstanceType
       ImageId: !Sub "{{resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2}}"
       IamInstanceProfile: !Ref EC2InstanceProfile
       SubnetId: !Ref PublicSubnet1Id
@@ -65,7 +74,7 @@ Resources:
     Type: AWS::EC2::LaunchTemplate
     Properties:
       LaunchTemplateData:
-        InstanceType: t3.micro
+        InstanceType: !Ref InstanceType
         ImageId: !Sub "{{resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2}}"
         IamInstanceProfile:
           Arn: !GetAtt EC2InstanceProfile.Arn
@@ -79,6 +88,7 @@ Resources:
             systemctl enable httpd
             systemctl start httpd
             echo "Hello from App Server" > /var/www/html/index.html
+            echo "DB_ENDPOINT=${RDSPrimaryEndpoint}" >> /etc/environment
       LaunchTemplateName: AppServerTemplate
 
   ## Auto Scaling Group for App Server
