@@ -102,7 +102,7 @@ Resources:
         PublicSubnet1Id: !GetAtt VPCStack.Outputs.PublicSubnet1Id
         PublicSubnet2Id: !GetAtt VPCStack.Outputs.PublicSubnet2Id
         NLBSGId: !GetAtt SecurityGroupsStack.Outputs.NLBSGId
-        AppServerASGName: !GetAtt AppASGStack.Outputs.ASGName
+        AppServerASGName: !GetAtt AppASGStack.Outputs.AppServerASGName
 
   ## S3 + CloudFront
   S3CloudFrontStack:
