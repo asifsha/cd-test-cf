@@ -92,5 +92,5 @@ jobs:
           --parameter-overrides \
             BucketName=$BUCKET \
             DBUsername=masteruser \
-            DBPassword=$DB_PASSWORD \
+            DBPassword=${{ secrets.DB_PASSWORD }} \
             InstanceType=t3.micro
